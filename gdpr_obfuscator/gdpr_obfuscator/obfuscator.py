@@ -8,7 +8,24 @@ class Obfuscator:
     """
     """
     def __init__(self, json_string:str):
-       
+        """
+        Initializes an instance of the class by parsing the provided JSON string.
+
+        The constructor parses the given JSON string to extract the file location
+        and optional fields to obfuscate. If the JSON string is empty, a ValueError
+        is raised. The extracted information is stored in instance variables.
+
+        Arguments:
+            json_string (str): A JSON-formatted string containing the file location 
+            and optional fields to obfuscate. The string should include the key 
+            'file_to_obfuscate' and optionally 'pii_fields'.
+
+        Raises:
+            ValueError: If the provided JSON string is empty.
+            KeyError: If the 'file_to_obfuscate' key is missing in the JSON string.
+            ValueError: If the 'file_to_obfuscate' key is empty in the JSON string.
+        """
+        
         # If there the json string is empty then a Value error is raised
         if not json_string:
             raise ValueError("JSON string cannot be empty")
@@ -20,6 +37,29 @@ class Obfuscator:
         self.pii_fields = fields
 
     def __get_data(self, json_string:str):
+        """
+        Parses a JSON string to extract the file location and optional fields to obfuscate.
+
+        This function loads a JSON string, checks for the presence of required keys, 
+        and returns the file path and a list of fields to obfuscate. If the necessary 
+        keys are missing or invalid, appropriate exceptions are raised.
+
+        Arguments:
+            json_string (str): A JSON-formatted string containing the file path 
+            and optional fields to obfuscate. The string must include the key 
+            'file_to_obfuscate' and optionally 'pii_fields'.
+
+        Returns:
+            tuple: A tuple containing:
+                - file_name (str): The value associated with the 'file_to_obfuscate' key.
+                - pii_fields (list): A list of fields to obfuscate, defaults to an empty list 
+                if the key 'pii_fields' is missing.
+
+        Raises:
+            json.JSONDecodeError: If the input string is not a valid JSON.
+            KeyError: If the key 'file_to_obfuscate' is missing from the JSON string.
+            ValueError: If the 'file_to_obfuscate' key is empty.
+        """
         try:
             # Parse the json string for file location and fields to obfuscate
             data = json.loads(json_string)
@@ -104,8 +144,20 @@ class Obfuscator:
 
     def __is_valid_file(self, file_path: str) -> bool:
         """
-        Checks if the given file path is a valid file.
-        Checks both local and S3 paths.
+        Determines if the given file path is valid.
+
+        This function checks the validity of the file path by determining if it 
+        points to a local file or a file stored in an S3 bucket. If the path starts
+        with "s3://", it is treated as an S3 file path and validated accordingly. 
+        Otherwise, it checks the file's existence as a local file.
+
+        Arguments:
+            file_path (str): The path to the file to validate. It can be either a 
+            local file path or an S3 file path.
+
+        Returns:
+            bool: True if the file path points to an existing local file or a valid 
+            S3 key. False otherwise.
         """
 
         if file_path.startswith('s3://'):
@@ -118,7 +170,13 @@ class Obfuscator:
 
     def __is_valid_s3_file(self, s3_url: str) -> bool:
         """
-        Checks if the file exists in an S3 bucket.
+        Validates if a given S3 URL points to an existing file in an AWS S3 bucket.
+
+        Args:
+            s3_url (str): The URL of the file (key) in the S3 bucket, typically in the format 's3://bucket-name/key'.
+
+        Returns:
+            bool: True if the file exists and is accessible in the specified S3 bucket, otherwise False.
         """
         s3 = boto3.client('s3')
         parsed_url = urlparse(s3_url)
@@ -134,7 +192,22 @@ class Obfuscator:
 
     def __parse_s3_uri(self, s3_uri: str):
         """
-        Parses the S3 URI and returns the bucket name and key.
+        Parses an S3 URI and extracts the bucket name and key.
+
+        This function validates the given S3 URI to ensure it starts with "s3://". 
+        After validation, it splits the URI into the bucket name and the key.
+
+        Arguments:
+            s3_uri (str): The S3 URI to parse. It must be in the format 
+            "s3://bucket_name/key".
+
+        Returns:
+            tuple: A tuple containing:
+                - bucket_name (str): The name of the S3 bucket.
+                - key (str): The key (file path) within the S3 bucket.
+
+        Raises:
+            ValueError: If the provided URI does not start with "s3://".
         """
         if not s3_uri.startswith("s3://"):
             raise ValueError("Invalid S3 URI")
