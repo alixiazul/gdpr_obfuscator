@@ -73,3 +73,8 @@ unit-test:
 ## Clean up .pyc files and any other temporary files
 clean:
 	$(call execute_in_env, find . -name "*.pyc" -exec rm -f {} \;)
+
+
+## Upgrade libraies
+upgrade-libraries:
+	$(call execute_in_env, $(PIP) freeze | awk -F '==' '{print $$1}' | xargs $(PIP) install --upgrade)
