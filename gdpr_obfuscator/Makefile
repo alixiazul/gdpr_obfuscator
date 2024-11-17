@@ -59,12 +59,12 @@ dev-setup: bandit safety black coverage
 
 ## Run the security test (bandit + safety)
 security-test:
-	$(call execute_in_env, safety check -r ./requirements.txt)
-	$(call execute_in_env, bandit -lll */*.py *c/*/*.py)
+	$(call execute_in_env, safety scan -r ./requirements.txt)
+	$(call execute_in_env, bandit */*.py -n 3 -lll)
 
 ## Run the black code check
 run-black:
-	$(call execute_in_env, black  src tests)
+	$(call execute_in_env, black gdpr_obfuscator test)
 
 ## Run the unit tests
 unit-test:
