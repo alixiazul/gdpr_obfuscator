@@ -60,6 +60,8 @@ dev-setup: bandit safety black coverage
 ## Run the security test (bandit + safety)
 security-test:
 	$(call execute_in_env, safety scan -r ./requirements.txt)
+
+bandit-report:
 	$(call execute_in_env, bandit */*.py -n 3 -lll)
 
 ## Run the black code check
@@ -69,10 +71,6 @@ run-black:
 ## Run the unit tests
 unit-test:
 	$(call execute_in_env, PYTHONPATH=${PYTHONPATH} pytest -vvvrP --testdox test)
-
-## Clean up .pyc files and any other temporary files
-clean:
-	$(call execute_in_env, find . -name "*.pyc" -exec rm -f {} \;)
 
 ## Run the report coverage  
 report-coverage: coverage
