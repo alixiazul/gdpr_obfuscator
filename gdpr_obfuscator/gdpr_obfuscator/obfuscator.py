@@ -127,7 +127,7 @@ class Obfuscator:
             raise ValueError(
                 f"The file '{file_name}' does not exist or is not a valid file"
             )
-        
+
         # # If it is a normal file then
         # if os.path.isfile(file_name):
         #     pass
@@ -188,32 +188,6 @@ class Obfuscator:
         except s3.exceptions.ClientError:
             return False
 
-    # def __parse_s3_uri(self, s3_uri: str):
-    #     """
-    #     Parses an S3 URI and extracts the bucket name and key.
-
-    #     This function validates the given S3 URI to ensure it starts with "s3://".
-    #     After validation, it splits the URI into the bucket name and the key.
-
-    #     Arguments:
-    #         s3_uri (str): The S3 URI to parse. It must be in the format
-    #         "s3://bucket_name/key".
-
-    #     Returns:
-    #         tuple: A tuple containing:
-    #             - bucket_name (str): The name of the S3 bucket.
-    #             - key (str): The key (file path) within the S3 bucket.
-
-    #     Raises:
-    #         ValueError: If the provided URI does not start with "s3://".
-    #     """
-    #     if not s3_uri.startswith("s3://"):
-    #         raise ValueError("Invalid S3 URI")
-
-    #     s3_uri = s3_uri[5:]
-    #     bucket_name, key = s3_uri.split("/", 1)
-    #     return bucket_name, key
-
     def obfuscate(self) -> io.StringIO:
         """
         Obfuscates the PII fields in a CSV file.
@@ -246,7 +220,7 @@ class Obfuscator:
         byte_stream.seek(0)
 
         # Convert the byte stream to an UTF-8 encoded byte representation
-        #return byte_stream.getvalue().encode("utf-8")
+        # return byte_stream.getvalue().encode("utf-8")
 
         # Return the byte stream directly (no encoding needed)
         return byte_stream
