@@ -29,7 +29,7 @@ class Obfuscator:
             ValueError: If the 'file_to_obfuscate' key is empty in the JSON string.
         """
 
-        # If there the json string is empty then a Value error is raised
+        # If the json string is empty then a Value error is raised
         if not json_string:
             raise ValueError("JSON string cannot be empty")
 
@@ -127,19 +127,17 @@ class Obfuscator:
             raise ValueError(
                 f"The file '{file_name}' does not exist or is not a valid file"
             )
+        
+        # # If it is a normal file then
+        # if os.path.isfile(file_name):
+        #     pass
 
-        # Check if the file exists in the data bucket
-        s3 = boto3.client("s3")
-        bucket_name, key = self.__parse_s3_uri(file_name)
+        # else:
 
-        try:
-            # Get the object from the bucket
-            s3.head_object(Bucket=bucket_name, Key=key)
-        except ClientError as e:
-            # Raise an error if the file does not exist
-            raise ValueError(
-                f"File '{file_name}' not found in S3 bucket '{bucket_name}'"
-            )
+        #     # Check if the file exists in the data bucket
+        #     s3 = boto3.client("s3")
+        #     bucket_name, key = self.__parse_s3_uri(file_name)
+        #     s3.head_object(Bucket=bucket_name, Key=key)
 
         # Set the attribute
         self.__file_to_obfuscate = file_name
@@ -190,31 +188,31 @@ class Obfuscator:
         except s3.exceptions.ClientError:
             return False
 
-    def __parse_s3_uri(self, s3_uri: str):
-        """
-        Parses an S3 URI and extracts the bucket name and key.
+    # def __parse_s3_uri(self, s3_uri: str):
+    #     """
+    #     Parses an S3 URI and extracts the bucket name and key.
 
-        This function validates the given S3 URI to ensure it starts with "s3://".
-        After validation, it splits the URI into the bucket name and the key.
+    #     This function validates the given S3 URI to ensure it starts with "s3://".
+    #     After validation, it splits the URI into the bucket name and the key.
 
-        Arguments:
-            s3_uri (str): The S3 URI to parse. It must be in the format
-            "s3://bucket_name/key".
+    #     Arguments:
+    #         s3_uri (str): The S3 URI to parse. It must be in the format
+    #         "s3://bucket_name/key".
 
-        Returns:
-            tuple: A tuple containing:
-                - bucket_name (str): The name of the S3 bucket.
-                - key (str): The key (file path) within the S3 bucket.
+    #     Returns:
+    #         tuple: A tuple containing:
+    #             - bucket_name (str): The name of the S3 bucket.
+    #             - key (str): The key (file path) within the S3 bucket.
 
-        Raises:
-            ValueError: If the provided URI does not start with "s3://".
-        """
-        if not s3_uri.startswith("s3://"):
-            raise ValueError("Invalid S3 URI")
+    #     Raises:
+    #         ValueError: If the provided URI does not start with "s3://".
+    #     """
+    #     if not s3_uri.startswith("s3://"):
+    #         raise ValueError("Invalid S3 URI")
 
-        s3_uri = s3_uri[5:]
-        bucket_name, key = s3_uri.split("/", 1)
-        return bucket_name, key
+    #     s3_uri = s3_uri[5:]
+    #     bucket_name, key = s3_uri.split("/", 1)
+    #     return bucket_name, key
 
     def obfuscate(self) -> io.StringIO:
         """
@@ -248,4 +246,7 @@ class Obfuscator:
         byte_stream.seek(0)
 
         # Convert the byte stream to an UTF-8 encoded byte representation
-        return byte_stream.getvalue().encode("utf-8")
+        #return byte_stream.getvalue().encode("utf-8")
+
+        # Return the byte stream directly (no encoding needed)
+        return byte_stream
