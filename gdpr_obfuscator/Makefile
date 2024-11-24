@@ -74,6 +74,10 @@ unit-test:
 clean:
 	$(call execute_in_env, find . -name "*.pyc" -exec rm -f {} \;)
 
+## Run the report coverage  
+report-coverage: coverage
+	$(call execute_in_env, PYTHONPATH=${PYTHONPATH} coverage run -m pytest -vvvrP --testdox test)
+	$(call execute_in_env, PYTHONPATH=${PYTHONPATH} coverage report -m)
 
 ## Upgrade libraies
 upgrade-libraries:
