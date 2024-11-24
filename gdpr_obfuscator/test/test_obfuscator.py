@@ -2,6 +2,8 @@ import pytest
 import os
 import boto3
 import json
+import io
+import csv
 from moto import mock_aws
 from gdpr_obfuscator.obfuscator import Obfuscator
 
@@ -41,6 +43,17 @@ def json_string_with_valid_s3_file(
     return json_string
 
 
+def json_string_with_valid_file(
+    file_name: str, pii_fields: list = None
+):
+    # If pii_fields are defined then use them in the json_string
+    pii_fields_str = f'"pii_fields": {json.dumps(pii_fields)}' if pii_fields else ""
+
+    # The trailing comma is only added if pii_fields is present (not empty)
+    json_string = f'{{"file_to_obfuscate": "{file_name}"{"," if pii_fields_str else ""} {pii_fields_str}}}'
+    return json_string
+
+
 class TestObfuscator:
 
     def test_obfuscator_throws_an_error_with_no_argument(self):
@@ -48,6 +61,13 @@ class TestObfuscator:
             Obfuscator()
 
     def test_obfuscator_throws_an_error_with_an_empty_json_script(self):
+        json_string = ""
+        with pytest.raises(
+            ValueError, match="JSON string cannot be empty"
+        ):
+            Obfuscator(json_string)
+
+    def test_obfuscator_throws_an_error_with_a_json_script_with_no_data(self):
         json_string = "{}"
         with pytest.raises(
             KeyError, match="Key 'file_to_obfuscate' is missing in the JSON string"
@@ -95,7 +115,8 @@ class TestObfuscator:
             "file_to_obfuscate":"asdf"
         }"""
 
-        with pytest.raises(ValueError):
+        expected_message = f"The file 'asdf' does not exist or is not a valid file"
+        with pytest.raises(ValueError, match=expected_message):
             Obfuscator(json_string)
 
     def test_obfuscator_throws_an_error_with_a_json_script_with_invalid_s3_file(
@@ -165,12 +186,17 @@ class TestObfuscator:
         assert obfuscator.pii_fields == pii_fields
 
     def test_obfuscator_obfuscate_pii_fields(self, s3_client):
-        bucket_name = "my-ingestion-bucket"
-        file_name = "new_data/file1.csv"
+        file_name = "data/file.csv"
         pii_fields = ["name", "email_address"]
 
-        json_string = json_string_with_valid_s3_file(
-            s3_client, bucket_name, file_name, pii_fields
-        )
+        json_string = json_string_with_valid_file(file_name, pii_fields)
         obfuscator = Obfuscator(json_string)
-        assert obfuscator.obfuscate() == True
+        obfuscated_file = obfuscator.obfuscate()
+
+        # Check the contents of the obfuscated data
+        reader = csv.DictReader(obfuscated_file)
+        
+        # Verify that the PII fields are obfuscated
+        for row in reader:
+            for pii_field in pii_fields:
+                assert row[pii_field] == "***"
