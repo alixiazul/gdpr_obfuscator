@@ -43,9 +43,7 @@ def json_string_with_valid_s3_file(
     return json_string
 
 
-def json_string_with_valid_file(
-    file_name: str, pii_fields: list = None
-):
+def json_string_with_valid_file(file_name: str, pii_fields: list = None):
     # If pii_fields are defined then use them in the json_string
     pii_fields_str = f'"pii_fields": {json.dumps(pii_fields)}' if pii_fields else ""
 
@@ -62,9 +60,7 @@ class TestObfuscator:
 
     def test_obfuscator_throws_an_error_with_an_empty_json_script(self):
         json_string = ""
-        with pytest.raises(
-            ValueError, match="JSON string cannot be empty"
-        ):
+        with pytest.raises(ValueError, match="JSON string cannot be empty"):
             Obfuscator(json_string)
 
     def test_obfuscator_throws_an_error_with_a_json_script_with_no_data(self):
@@ -195,7 +191,7 @@ class TestObfuscator:
 
         # Check the contents of the obfuscated data
         reader = csv.DictReader(obfuscated_file)
-        
+
         # Verify that the PII fields are obfuscated
         for row in reader:
             for pii_field in pii_fields:
