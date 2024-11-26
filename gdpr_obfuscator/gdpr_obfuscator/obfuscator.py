@@ -4,7 +4,7 @@ import boto3
 import csv
 import io
 from urllib.parse import urlparse
-from botocore.exceptions import ClientError
+import argparse
 
 
 class Obfuscator:
@@ -128,18 +128,6 @@ class Obfuscator:
                 f"The file '{file_name}' does not exist or is not a valid file"
             )
 
-        # # If it is a normal file then
-        # if os.path.isfile(file_name):
-        #     pass
-
-        # else:
-
-        #     # Check if the file exists in the data bucket
-        #     s3 = boto3.client("s3")
-        #     bucket_name, key = self.__parse_s3_uri(file_name)
-        #     s3.head_object(Bucket=bucket_name, Key=key)
-
-        # Set the attribute
         self.__file_to_obfuscate = file_name
 
     def __is_valid_file(self, file_path: str) -> bool:
@@ -178,15 +166,19 @@ class Obfuscator:
             bool: True if the file exists and is accessible in the specified S3 bucket, otherwise False.
         """
         s3 = boto3.client("s3")
-        parsed_url = urlparse(s3_url)
-        bucket_name = parsed_url.netloc
-        key = parsed_url.path.lstrip("/")
+        bucket_name, key = self.__get_bucket_name_and_key(s3_url)
 
         try:
             s3.head_object(Bucket=bucket_name, Key=key)
             return True
         except s3.exceptions.ClientError:
             return False
+
+    def __get_bucket_name_and_key(self, s3_url: str):
+        parsed_url = urlparse(s3_url)
+        bucket_name = parsed_url.netloc
+        key = parsed_url.path.lstrip("/")
+        return bucket_name, key
 
     def obfuscate(self) -> io.StringIO:
         """
@@ -196,14 +188,22 @@ class Obfuscator:
         Returns:
             A byte-stream representation of the obfuscated file.
         """
+        s3 = boto3.client("s3")
+
+        if self.file_to_obfuscate.startswith("s3://"):
+            bucket_name, file_name = self.__get_bucket_name_and_key(self.file_to_obfuscate)
+            file_obj = s3.get_object(Bucket=bucket_name,Key=file_name)
+            file_content = file_obj["Body"].read().decode("utf-8")
+            file = io.StringIO(file_content)
+        else:
+            file = open(self.file_to_obfuscate, "r")
 
         # Create a byte stream
         byte_stream = io.StringIO()
 
-        with open(self.file_to_obfuscate, "r") as file:
-            reader = csv.DictReader(file)
-            rows = list(reader)
-            fieldnames = reader.fieldnames
+        reader = csv.DictReader(file)
+        rows = list(reader)
+        fieldnames = reader.fieldnames
 
         # Process the rows and obfuscate PII fields
         for row in rows:
@@ -219,8 +219,46 @@ class Obfuscator:
         # Reset the pointer to the beginning of the byte stream
         byte_stream.seek(0)
 
-        # Convert the byte stream to an UTF-8 encoded byte representation
-        # return byte_stream.getvalue().encode("utf-8")
+        if not isinstance(file, io.StringIO):
+            file.close()
 
         # Return the byte stream directly (no encoding needed)
         return byte_stream
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Obfuscate PII fields in a CSV file using the Obfuscator class."
+    )
+    parser.add_argument(
+        "json_string",
+        type=str,
+        help="JSON string containing 'file_to_obfuscate' and optional 'pii_fields'.",
+    )
+    parser.add_argument(
+        "--output",
+        type=str,
+        default=None,
+        help="Optional path to save the obfuscated file. Defaults to stdout.",
+    )
+
+    args = parser.parse_args()
+
+    try:
+        # Create an instance of Obfuscator and process the file
+        obfuscator = Obfuscator(args.json_string)
+        obfuscated_file = obfuscator.obfuscate()
+
+        # Save to file or print to stdout
+        if args.output:
+            with open(args.output, "w") as out_file:
+                out_file.write(obfuscated_file.getvalue())
+            print(f"Obfuscated file saved to {args.output}")
+        else:
+            print(obfuscated_file.getvalue())
+
+    except Exception as e:
+        print(f"Error: {e}")
+
+if __name__ == "__main__":
+    main()
