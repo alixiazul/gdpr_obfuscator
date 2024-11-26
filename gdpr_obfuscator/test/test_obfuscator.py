@@ -157,6 +157,18 @@ class TestObfuscator:
         with pytest.raises(ValueError, match=expected_message):
             Obfuscator(json_string)
 
+
+    def test_obfuscator_throws_error_with_empty_csv_file(self, s3_client):
+        bucket_name = "my-ingestion-bucket"
+        file_name = "empty.csv"
+
+        json_string = json_string_with_valid_s3_file(s3_client, bucket_name, file_name)
+
+        with pytest.raises(ValueError):
+            Obfuscator(json_string)
+
+
+
     def test_obfuscator_ok_json_script_with_valid_s3_file_no_pii_fields(
         self, s3_client
     ):
@@ -167,6 +179,14 @@ class TestObfuscator:
         obfuscator = Obfuscator(json_string)
         assert obfuscator.file_to_obfuscate == f"s3://{bucket_name}/{file_name}"
         assert obfuscator.pii_fields == []
+
+        obfuscated_file = obfuscator.obfuscate()
+
+        original_file = s3_client.get_object(Bucket=bucket_name,Key=file_name)["Body"].read().decode("utf-8")
+        obfuscated_content = obfuscated_file.getvalue()
+
+        assert original_file.strip() == obfuscated_content.strip()
+
 
     def test_obfuscator_ok_json_script_with_valid_s3_file_and_pii_fields(
         self, s3_client
