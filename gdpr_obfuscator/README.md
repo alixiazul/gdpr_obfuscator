@@ -50,3 +50,24 @@ student_id,name,course,cohort,graduation_date,email_address
 ```
 
 The output will be a byte-stream representation of the file, compatible with the boto3 S3 PutObject function.
+
+
+## Installation Instructions
+
+### Prerequisites
+
+- Python 3.x: ensure you have Python installed. Check version using
+
+```
+python --version 
+```
+
+or
+
+```
+python3 --version 
+```
+
+
+- AWS account: you need an active AWS account with credentials (access keys or IAM roles) that have permissions to read and write to the required S3 bucket.
+- Boto3: 
