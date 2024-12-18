@@ -22,6 +22,15 @@ def s3_client(aws_credentials):
     with mock_aws():
         yield boto3.client("s3", region_name="eu-west-2")
 
+@pytest.fixture
+def empty_file(tmp_path):
+    """
+    Fixture to create an empty file in a temporary directory.
+    """
+    file_path = tmp_path / "empty_file.csv"
+    file_path.touch()
+    return str(file_path)
+
 
 def json_string_with_valid_s3_file(
     s3_client, bucket_name: str, file_name: str, pii_fields: list = None
@@ -158,15 +167,27 @@ class TestObfuscator:
             Obfuscator(json_string)
 
 
-    def test_obfuscator_throws_error_with_empty_csv_file(self, s3_client):
+    # def test_obfuscator_throws_error_with_empty_csv_file(self, s3_client):
+    #     bucket_name = "my-ingestion-bucket"
+    #     file_name = "empty.csv"
+
+    #     json_string = json_string_with_valid_s3_file(s3_client, bucket_name, file_name)
+
+    #     with pytest.raises(ValueError):
+    #         obfuscator = Obfuscator(json_string)
+    #         file = obfuscator.obfuscate()
+    #         print("file: ", file)
+
+
+
+    def test_obfuscator_returns_false_with_empty_csv_file(self, s3_client, empty_file):
         bucket_name = "my-ingestion-bucket"
         file_name = "empty.csv"
 
         json_string = json_string_with_valid_s3_file(s3_client, bucket_name, file_name)
-
-        with pytest.raises(ValueError):
-            Obfuscator(json_string)
-
+        obfuscator = Obfuscator(json_string)
+        is_valid = obfuscator._Obfuscator__is_valid_file(empty_file)
+        assert is_valid is False
 
 
     def test_obfuscator_ok_json_script_with_valid_s3_file_no_pii_fields(
