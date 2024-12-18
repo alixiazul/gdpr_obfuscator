@@ -70,4 +70,19 @@ python3 --version
 
 
 - AWS account: you need an active AWS account with credentials (access keys or IAM roles) that have permissions to read and write to the required S3 bucket.
-- Boto3: 
+
+
+## Use of the obfuscator from the command line
+
+Go to the directory gdpr_obfuscator, where the obfuscator.py file is.
+Run any of these lines, depending on the file you want to use for demonstration purposes:
+
+- Data file with 2 fields:
+```
+python obfuscator.py '{ "file_to_obfuscate": "../data/simple.csv", "pii_fields": ["name", "email"] }'
+```
+
+- Data file with 3 fields:
+```
+python obfuscator.py '{ "file_to_obfuscate": "../data/medium.csv", "pii_fields": ["name", "email"] }'
+```
