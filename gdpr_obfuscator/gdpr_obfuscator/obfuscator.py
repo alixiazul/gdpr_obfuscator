@@ -230,66 +230,66 @@ class Obfuscator:
         return byte_stream
 
 
-def lambda_handler(event, context):
-    try:
-        # Extract the S3 bucket name and the file key from the event
-        bucket_name = event['Records'][0]['s3']['bucket']['name']
-        file_key = event['Records'][0]['s3']['object']['key']
+# def lambda_handler(event, context):
+#     try:
+#         # Extract the S3 bucket name and the file key from the event
+#         bucket_name = event['Records'][0]['s3']['bucket']['name']
+#         file_key = event['Records'][0]['s3']['object']['key']
         
-        # Initialize an S3 client using Boto3
-        s3 = boto3.client('s3')
+#         # Initialize an S3 client using Boto3
+#         s3 = boto3.client('s3')
         
-        # Fetch the file from the S3 bucket
-        file_obj = s3.get_object(Bucket=bucket_name, Key=file_key)
-        file_content = file_obj['Body'].read().decode('utf-8')  # Read the file content as a string
+#         # Fetch the file from the S3 bucket
+#         file_obj = s3.get_object(Bucket=bucket_name, Key=file_key)
+#         file_content = file_obj['Body'].read().decode('utf-8')  # Read the file content as a string
         
-        # Your code to process the file, e.g., obfuscating sensitive data
-        json_string = json_string_with_valid_s3_file(s3, bucket_name, file_key, ["name", "email_address"])
-        obfuscator = Obfuscator(json_string)
-        obfuscated_file = obfuscator.obfuscate()  # You can use your 'obfuscate' function here
+#         # Your code to process the file, e.g., obfuscating sensitive data
+#         json_string = json_string_with_valid_s3_file(s3, bucket_name, file_key, ["name", "email_address"])
+#         obfuscator = Obfuscator(json_string)
+#         obfuscated_file = obfuscator.obfuscate()  # You can use your 'obfuscate' function here
         
-        # Add "obfuscated_" prefix to the filename
-        # Example: file_key = "path/to/original.csv" --> output_key = "path/to/obfuscated_original.csv"
-        key_parts = file_key.split('/')
-        file_name = key_parts[-1]
-        obfuscated_file_name = f"obfuscated_{file_name}"
-        output_key = '/'.join(key_parts[:-1] + [obfuscated_file_name])
+#         # Add "obfuscated_" prefix to the filename
+#         # Example: file_key = "path/to/original.csv" --> output_key = "path/to/obfuscated_original.csv"
+#         key_parts = file_key.split('/')
+#         file_name = key_parts[-1]
+#         obfuscated_file_name = f"obfuscated_{file_name}"
+#         output_key = '/'.join(key_parts[:-1] + [obfuscated_file_name])
         
         
-        # Upload the processed file back to S3
-        s3.put_object(Bucket=bucket_name, Key=output_key, Body=obfuscated_file)
+#         # Upload the processed file back to S3
+#         s3.put_object(Bucket=bucket_name, Key=output_key, Body=obfuscated_file)
         
-        # Return a success response
-        return {
-            'statusCode': 200,
-            'body': json.dumps(f"Obfuscated file saved to s3://{bucket_name}/{output_key}")
-        }
+#         # Return a success response
+#         return {
+#             'statusCode': 200,
+#             'body': json.dumps(f"Obfuscated file saved to s3://{bucket_name}/{output_key}")
+#         }
     
-    except Exception as e:
-        # If there's an error, return an error message
-        return {
-            'statusCode': 500,
-            'body': json.dumps(f"Error: {str(e)}")
-        }
+#     except Exception as e:
+#         # If there's an error, return an error message
+#         return {
+#             'statusCode': 500,
+#             'body': json.dumps(f"Error: {str(e)}")
+#         }
 
-def json_string_with_valid_s3_file(
-    s3_client, bucket_name: str, file_name: str, pii_fields: list = None
-):
-    # Mock S3 bucket and object with explicit region
-    s3_client.create_bucket(
-        Bucket=bucket_name,
-        CreateBucketConfiguration={"LocationConstraint": "eu-west-2"},
-    )
+# def json_string_with_valid_s3_file(
+#     s3_client, bucket_name: str, file_name: str, pii_fields: list = None
+# ):
+#     # Mock S3 bucket and object with explicit region
+#     s3_client.create_bucket(
+#         Bucket=bucket_name,
+#         CreateBucketConfiguration={"LocationConstraint": "eu-west-2"},
+#     )
 
-    # Mock a valid file to the bucket
-    s3_client.put_object(Bucket=bucket_name, Key=file_name, Body="test data")
+#     # Mock a valid file to the bucket
+#     s3_client.put_object(Bucket=bucket_name, Key=file_name, Body="test data")
 
-    # If pii_fields are defined then use them in the json_string
-    pii_fields_str = f'"pii_fields": {json.dumps(pii_fields)}' if pii_fields else ""
+#     # If pii_fields are defined then use them in the json_string
+#     pii_fields_str = f'"pii_fields": {json.dumps(pii_fields)}' if pii_fields else ""
 
-    # The trailing comma is only added if pii_fields is present (not empty)
-    json_string = f'{{"file_to_obfuscate": "s3://{bucket_name}/{file_name}"{"," if pii_fields_str else ""} {pii_fields_str}}}'
-    return json_string
+#     # The trailing comma is only added if pii_fields is present (not empty)
+#     json_string = f'{{"file_to_obfuscate": "s3://{bucket_name}/{file_name}"{"," if pii_fields_str else ""} {pii_fields_str}}}'
+#     return json_string
 
 
 def main():
