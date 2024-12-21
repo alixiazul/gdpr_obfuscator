@@ -77,6 +77,6 @@ report-coverage: coverage
 	$(call execute_in_env, PYTHONPATH=${PYTHONPATH} coverage run -m pytest -vvvrP --testdox test)
 	$(call execute_in_env, PYTHONPATH=${PYTHONPATH} coverage report -m)
 
-## Upgrade libraies
+## Upgrade libraries
 upgrade-libraries:
 	$(call execute_in_env, $(PIP) freeze | awk -F '==' '{print $$1}' | xargs $(PIP) install --upgrade)

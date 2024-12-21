@@ -6,3 +6,5 @@
 .coverage
 *.tfstate*
 .terraform*
+.python-version
+layer.zip

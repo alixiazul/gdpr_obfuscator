@@ -2,7 +2,6 @@ import pytest
 import os
 import boto3
 import json
-import io
 import csv
 from moto import mock_aws
 from gdpr_obfuscator.obfuscator import Obfuscator
@@ -165,19 +164,6 @@ class TestObfuscator:
         )
         with pytest.raises(ValueError, match=expected_message):
             Obfuscator(json_string)
-
-
-    # def test_obfuscator_throws_error_with_empty_csv_file(self, s3_client):
-    #     bucket_name = "my-ingestion-bucket"
-    #     file_name = "empty.csv"
-
-    #     json_string = json_string_with_valid_s3_file(s3_client, bucket_name, file_name)
-
-    #     with pytest.raises(ValueError):
-    #         obfuscator = Obfuscator(json_string)
-    #         file = obfuscator.obfuscate()
-    #         print("file: ", file)
-
 
 
     def test_obfuscator_returns_false_with_empty_csv_file(self, s3_client, empty_file):
