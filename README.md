@@ -91,15 +91,68 @@ make unit-test
 
 ### Use of the GDPR Obfuscator from the command line
 
-Go to the directory gdpr_obfuscator, where the obfuscator.py file is.
 Run any of these lines, depending on the file you want to use for demonstration purposes:
 
 - Data file with 2 fields:
 ```
-python obfuscator.py '{ "file_to_obfuscate": "../data/simple.csv", "pii_fields": ["name", "email"] }'
+python obfuscator.py '{ "file_to_obfuscate": "../data/simple.csv", "pii_fields": ["name", "email_address"] }'
 ```
 
 - Data file with 3 fields:
 ```
-python obfuscator.py '{ "file_to_obfuscate": "../data/medium.csv", "pii_fields": ["name", "email"] }'
+python obfuscator.py '{ "file_to_obfuscate": "../data/medium.csv", "pii_fields": ["name", "email_address"] }'
+```
+
+
+### Use of the GDPR Obfuscator from a Lambda Function in an AWS Account
+
+You can use your own lambda function, adding the gdpr_obfuscator as a library in a layer.
+
+If you want to use a blueprint to start using the obfuscator on a lambda function, then you can recreate the function by using Terraform.
+For this option, you need to have Terraform installed.
+
+Go to the directory "terraform" and execute:
+```
+terraform init
+terraform plan
+terraform apply
+```
+
+Invoke the lambda with a test:
+(Replace [BUCKET_NAME] with the name of your bucket)
+
+
+- Test S3 trigger:
+
+```
+{
+  "Records": [
+    {
+      "s3": {
+        "bucket": {
+          "name": "[BUCKET_NAME]"
+        },
+        "object": {
+          "key": "file.csv"
+        }
+      }
+    }
+  ]
+}
+```
+
+By default, the pii_fields for an test S3 trigger are "name" and "email_address".
+If you want to change them, go to the blueprint and modify accordingly.
+
+
+- Any other tool such as EventBridge, Step Functions, or Airflow as a trigger:
+
+```
+{
+  "file_to_obfuscate": "s3://[BUCKET_NAME]/file.csv",
+  "pii_fields": [
+    "name",
+    "email_address"
+  ]
+}
 ```
