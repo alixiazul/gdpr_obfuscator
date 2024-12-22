@@ -87,9 +87,6 @@ or
 python3 --version 
 ```
 
-- AWS account: you need an active AWS account with credentials (access keys or IAM roles) that have permissions to read and write to the required S3 bucket.
-
-
 - Install required libraries
 ```
 make requirements
@@ -123,6 +120,8 @@ python obfuscator.py '{ "file_to_obfuscate": "../data/medium.csv", "pii_fields":
 
 
 ### Use of the GDPR Obfuscator from a Lambda Function in an AWS Account
+
+You need an active AWS account with credentials (access keys or IAM roles) that have permissions to read and write to the required S3 bucket.
 
 You can integrate the GDPR Obfuscator into an AWS Lambda function in two ways:
 
