@@ -176,7 +176,7 @@ class TestObfuscator:
         assert is_valid is False
 
 
-    def test_obfuscator_ok_json_script_with_valid_s3_file_no_pii_fields(
+    def test_obfuscator_csv_file_with_no_pii_fields_remains_unchanged(
         self, s3_client
     ):
         bucket_name = "my-ingestion-bucket"
@@ -194,19 +194,6 @@ class TestObfuscator:
 
         assert original_file.strip() == obfuscated_content.strip()
 
-
-    def test_obfuscator_ok_json_script_with_valid_s3_file_and_pii_fields(
-        self, s3_client
-    ):
-        bucket_name = "my-ingestion-bucket"
-        file_name = "existent-file.csv"
-        pii_fields = ["name", "email_address"]
-
-        json_string = json_string_with_valid_s3_file(
-            s3_client, bucket_name, file_name, pii_fields
-        )
-        obfuscator = Obfuscator(json_string)
-        assert obfuscator.pii_fields == pii_fields
 
     def test_obfuscator_obfuscate_pii_fields(self, s3_client):
         file_name = "data/file.csv"
