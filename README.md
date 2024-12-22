@@ -186,3 +186,4 @@ You can use other tools (e.g., EventBridge, Step Functions, or Airflow) to invok
 3. **Field Auto-Detection**: Implement a feature to automatically detect PII fields using heuristics or machine learning.
 4. **Performance Optimization**: Scale processing to handle larger files efficiently.
 5. **Integration with Data Pipelines**: Provide out-of-the-box support for integration with popular data processing frameworks like Apache Spark or AWS Glue.
+6. **Create a pip package**: Install the GDPR Obfuscator as a pip package
