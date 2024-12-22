@@ -39,7 +39,7 @@ class Obfuscator:
         self.file_to_obfuscate = file_location
         self.pii_fields = fields
 
-    def __get_data(self, json_string: str):
+    def __get_data(self, json_string: str) -> tuple[str, list]:
         """
         Parses a JSON string to extract the file location and optional fields to obfuscate.
 
@@ -178,7 +178,22 @@ class Obfuscator:
         except s3.exceptions.ClientError:
             return False
 
-    def __get_bucket_name_and_key(self, s3_url: str):
+    def __get_bucket_name_and_key(self, s3_url: str) -> tuple[str, str]:
+        """
+        Extracts the bucket name and key from an S3 URL.
+
+        Args:
+            s3_url (str): The S3 URL in the format 's3://bucket-name/key'.
+
+        Returns:
+            tuple: A tuple containing the bucket name (str) and the key (str).
+
+        Example:
+            s3_url = "s3://my-bucket/my-folder/my-file.csv"
+            bucket_name, key = self.__get_bucket_name_and_key(s3_url)
+            # bucket_name = "my-bucket"
+            # key = "my-folder/my-file.csv"
+        """
         parsed_url = urlparse(s3_url)
         bucket_name = parsed_url.netloc
         key = parsed_url.path.lstrip("/")
